@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="kn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kannada Speech to Unicode</title>
+    <script src="elm.js"></script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f2f2f2;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+
+        header {
+            background-color: #2c3e50;
+            padding: 15px;
+            color: white;
+            font-size: 22px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            text-align: left;
+        }
+
+        .textarea-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+            min-height: 50px;
+            resize: vertical;
+        }
+
+        .mic-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 22px;
+            color: #006366;
+            transition: color 0.3s ease-in-out;
+        }
+
+        .mic-icon:hover {
+            color: #ff4500;
+        }
+
+        .mic-active {
+            color: red !important;
+        }
+
+        button {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 15px;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .deleteButton {
+            background-color: #e74c3c;
+        }
+
+        .deleteButton:hover {
+            background-color: #c0392b;
+        }
+
+        .convertButton {
+            background-color: #3498db;
+        }
+
+        .convertButton:hover {
+            background-color: #2980b9;
+        }
+
+        .output-box {
+            background: #ffffff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            min-height: 50px;
+            color: #333;
+            white-space: pre-wrap;
+        }
+
+        .info-text {
+            font-size: 14px;
+            color: #555;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>🎙 Kannada Speech to text</header>
+
+    <div class="container">
+        <div class="textarea-wrapper">
+            <h3> Kannada Input (ASCII Text)</h3>
+            <textarea id="tc" name="tc" ></textarea>
+            <span class="mic-icon" id="micButton"><i class="fas fa-microphone"></i></span>
+        </div>
+
+        <button type="button" class="convertButton" id="convertButton">ASCII ➝ Unicode</button>
+        <button type="button" class="deleteButton" id="clearButton">ಅಳಿಸಿ</button>
+
+        <br><br><h3>Unicode Output</h3>
+        <div id="unicodeOutput" class="output-box"></div>
+
+    </div>
+
+    <script>
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'kn-IN'; 
+        recognition.interimResults = false;
+
+        const micButton = document.getElementById("micButton");
+        const textArea = document.getElementById("tc");
+        const clearButton = document.getElementById("clearButton");
+        const convertButton = document.getElementById("convertButton");
+        const unicodeOutput = document.getElementById("unicodeOutput");
+        const micIcon = micButton.querySelector("i");
+
+        micButton.addEventListener("click", () => {
+            micIcon.classList.add("mic-active");
+            recognition.start();
+        });
+
+        recognition.onresult = function(event) {
+            const speechResult = event.results[0][0].transcript;
+            textArea.value += " " + speechResult;
+        };
+
+        recognition.onend = function() {
+            micIcon.classList.remove("mic-active");
+        };
+
+        recognition.onerror = function(event) {
+            alert("Speech recognition error: " + event.error);
+        };
+
+        clearButton.addEventListener("click", function() {
+            textArea.value = '';
+            unicodeOutput.innerText = '';
+        });
+
+        convertButton.addEventListener("click", function() {
+            const asciiText = textArea.value;
+            var a = Elm.Converter.init({
+                node: document.getElementById('elmapp')
+            });
+            a.ports.convert.subscribe(function(args) {
+                if (args.a2u) {
+                    var out = kn.ascii_to_unicode(asciiText, args.englishNumbers, args.removeExtraSpaces);
+                    unicodeOutput.innerText = out;
+                    app.ports.converted_text.send(out);
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
+
+        
