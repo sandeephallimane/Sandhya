@@ -24,17 +24,18 @@
       <div id="rowsContainer">
         <div class="row" id="row_1">
           <input type="date" name="r1c1" required>
-          <select name="Type" required>
+          <select name="Type1" required>
             <option value="Translation">Translation</option>
             <option value="Proof reading">Proof reading</option>
           </select>
-          <select name="r1c3" required>
+          <select name="PR1" required>
             <option value="nn1">nn1</option>
             <option value="gds">gds</option>
             <option value="gdsg">gdsg</option>
           </select>
-          <input type="text" name="r1c4" placeholder="Row 1, Col 4" required>
-          <input type="text" name="r1c5" placeholder="Row 1, Col 5" required>
+          <input type="text" name="PD1" placeholder="Particular/Description" required>
+          <input type="number" name="WC1" placeholder="Word Count" required>
+          <input type="number" name="RT1" placeholder="Rate(in Rs)" required>
           <button type="button" class="deleteBtn" onclick="deleteRow(1)">Delete</button>
         </div>
       </div>
@@ -74,17 +75,18 @@
       newRow.id = `row_${rowCount}`;
       newRow.innerHTML = `
         <input type="date" name="r${rowCount}c1" required>
-        <select name="r${rowCount}c2" required>
-          <option value="n1">n1</option>
-          <option value="n2">n2</option>
+        <select name="Type${rowCount}" required>
+          <option value="Translation">Translation</option>
+            <option value="Proof reading">Proof reading</option>
         </select>
-        <select name="r${rowCount}c3" required>
+        <select name="PR${rowCount}" required>
           <option value="nn1">nn1</option>
           <option value="gds">gds</option>
           <option value="gdsg">gdsg</option>
         </select>
-        <input type="text" name="r${rowCount}c4" placeholder="Row ${rowCount}, Col 4" required>
-        <input type="text" name="r${rowCount}c5" placeholder="Row ${rowCount}, Col 5" required>
+        <input type="text" name="PD${rowCount}" placeholder="Particular/Description" required>
+        <input type="number" name="WC${rowCount}" placeholder="Word Count" required>
+        <input type="number" name="RT${rowCount}" placeholder="Rate(in Rs)" required>
         <button type="button" class="deleteBtn" onclick="deleteRow(${rowCount})">Delete</button>
       `;
       document.getElementById('rowsContainer').appendChild(newRow);
