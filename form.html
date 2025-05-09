@@ -24,18 +24,18 @@
       <div id="rowsContainer">
         <div class="row" id="row_1">
           <input type="date" name="r1c1" required>
-          <select name="Type1" required>
+          <select name="r1c2" required>
             <option value="Translation">Translation</option>
             <option value="Proof reading">Proof reading</option>
           </select>
-          <select name="PR1" required>
+          <select name="r1c3" required>
             <option value="nn1">nn1</option>
             <option value="gds">gds</option>
             <option value="gdsg">gdsg</option>
           </select>
-          <input type="text" name="PD1" placeholder="Particular/Description" required>
-          <input type="number" name="WC1" placeholder="Word Count" required>
-          <input type="number" name="RT1" placeholder="Rate(in Rs)" required>
+          <input type="text" name="r1c4" placeholder="Particular/Description" required>
+          <input type="number" name="r1c4" placeholder="Word Count" required>
+          <input type="number" name="r1c5" placeholder="Rate(in Rs)" required>
           <button type="button" class="deleteBtn" onclick="deleteRow(1)">Delete</button>
         </div>
       </div>
@@ -75,18 +75,18 @@
       newRow.id = `row_${rowCount}`;
       newRow.innerHTML = `
         <input type="date" name="r${rowCount}c1" required>
-        <select name="Type${rowCount}" required>
+        <select name="r${rowCount}c2" required>
           <option value="Translation">Translation</option>
             <option value="Proof reading">Proof reading</option>
         </select>
-        <select name="PR${rowCount}" required>
+        <select name="r${rowCount}c3" required>
           <option value="nn1">nn1</option>
           <option value="gds">gds</option>
           <option value="gdsg">gdsg</option>
         </select>
-        <input type="text" name="PD${rowCount}" placeholder="Particular/Description" required>
-        <input type="number" name="WC${rowCount}" placeholder="Word Count" required>
-        <input type="number" name="RT${rowCount}" placeholder="Rate(in Rs)" required>
+        <input type="text" name="r${rowCount}c4" placeholder="Particular/Description" required>
+        <input type="number" name="r${rowCount}c5" placeholder="Word Count" required>
+        <input type="number" name="r${rowCount}c6" placeholder="Rate(in Rs)" required>
         <button type="button" class="deleteBtn" onclick="deleteRow(${rowCount})">Delete</button>
       `;
       document.getElementById('rowsContainer').appendChild(newRow);
@@ -116,9 +116,13 @@
       // Extract row data
       for (let i = 1; i <= rowCount; i++) {
         let row = [];
-        for (let j = 1; j <= 5; j++) {
+        for (let j = 1; j <= 6; j++) {
           row.push(formData.get(`r${i}c${j}`));
+          if(j==6){
+            row.push(formData.get(`r${i}c5`)*formData.get(`r${i}c6`))
+          }
         }
+  
         rows.push(row.join(':'));  // Join row values with ":"
       }
 
@@ -152,7 +156,7 @@
         tr.appendChild(dateCell);
 
         // Columns 2 and 3 (dropdown selections)
-        for (let i = 1; i < 5; i++) {
+        for (let i = 1; i < 7; i++) {
           const td = document.createElement('td');
           td.textContent = rowData[i];
           tr.appendChild(td);
