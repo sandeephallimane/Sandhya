@@ -1,44 +1,67 @@
-import fetch from 'node-fetch';
+export default async (req, res) => {
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbyhdaLWKH5UvvDKPlBb3UlswzjGl-9OO1FqhZht-RguR-raLZxCrly4MolH4v-4XNiAAQ/exec';
 
-export default async function handler(req, res) {
-  if (req.method === 'POST') {
-    try {
-      // Receive data from the frontend
-      const data = req.body;
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.status(204).end(); // No Content
+    return;
+  }
 
-      // Send data to Google Apps Script (replace YOUR_GAS_URL with the GAS endpoint)
-      const gasResponse = await fetch('https://script.google.com/macros/s/YOUR_GAS_URL/exec', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+if (req.method === 'POST') {
+  try {
+    console.log('Request body:', req.body);
 
-      if (!gasResponse.ok) {
-        throw new Error('Failed to contact GAS');
+    const response = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body),
+    });
+
+    console.log('Response status:', response.status, response.statusText);
+
+    const contentType = response.headers.get('Content-Type');
+
+    let data;
+    if (contentType && contentType.includes('application/json')) {
+      // Parse JSON response
+      data = await response.json();
+      console.log('Response from GAS (JSON):', data);
+
+      // Handle specific JSON structures
+      if (data.link) {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        return res.status(200).json({ link: data.link });
+      } else if (data.base64html) {
+        // Pass the base64html as-is without decoding
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        return res.status(200).json({ base64html: data.base64html });
+      } else {
+        throw new Error('JSON response does not contain expected keys (link or base64html)');
       }
-
-      // Wait for response from GAS
-      const gasData = await gasResponse.json();
-
-      // Return the response from GAS to the frontend
-      res.status(200).json({
-        status: 'success',
-        message: 'Data processed successfully by GAS',
-        data: gasData, // This is the response from GAS, if needed
-      });
-
-    } catch (error) {
-      res.status(500).json({
-        status: 'error',
-        message: error.message,
-      });
+    } else if (contentType && contentType.includes('text/html')) {
+      // Handle plain HTML response
+      data = await response.text();
+      console.log('Response from GAS (HTML):', data);
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      return res.status(200).send(data);
+    } else {
+      throw new Error(`Unexpected content type from GAS: ${contentType}`);
     }
-  } else {
-    res.status(405).json({
-      status: 'error',
-      message: 'Method Not Allowed',
+  } catch (error) {
+    console.error('Error communicating with GAS:', error.message);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    return res.status(500).json({
+      error: 'Error communicating with GAS',
+      details: error.message,
     });
   }
+} else {
+  // Handle unsupported HTTP methods
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST');
+  res.status(405).json({ error: 'Method Not Allowed' });
 }
+
+};
