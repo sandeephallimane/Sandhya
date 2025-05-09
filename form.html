@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Row Form with Preview</title>
+  <style>
+    .row { margin-bottom: 10px; }
+    .row input, .row select { margin-right: 10px; }
+    .deleteBtn { background-color: red; color: white; border: none; cursor: pointer; padding: 5px; }
+    .hidden { display: none; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    table, th, td { border: 1px solid black; }
+    th, td { padding: 10px; text-align: left; }
+    .backBtn, .submitBtn { background-color: #007BFF; color: white; border: none; padding: 10px 20px; cursor: pointer; margin-top: 20px; }
+    .submitBtn { background-color: #28a745; }
+  </style>
+</head>
+<body>
+  <h2 id="pageTitle">Add Rows Form</h2>
+
+  <div id="formPage">
+    <form id="dynamicForm">
+      <div id="rowsContainer">
+        <div class="row" id="row_1">
+          <input type="date" name="r1c1" required>
+          <select name="r1c2" required>
+            <option value="n1">n1</option>
+            <option value="n2">n2</option>
+          </select>
+          <select name="r1c3" required>
+            <option value="nn1">nn1</option>
+            <option value="gds">gds</option>
+            <option value="gdsg">gdsg</option>
+          </select>
+          <input type="text" name="r1c4" placeholder="Row 1, Col 4" required>
+          <input type="text" name="r1c5" placeholder="Row 1, Col 5" required>
+          <button type="button" class="deleteBtn" onclick="deleteRow(1)">Delete</button>
+        </div>
+      </div>
+
+      <button type="button" id="addRowBtn">Add Row</button>
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+
+  <div id="previewPage" class="hidden">
+    <h2>Preview of Added Rows</h2>
+    <table id="previewTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Column 2</th>
+          <th>Column 3</th>
+          <th>Column 4</th>
+          <th>Column 5</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <button class="backBtn" onclick="goBackToForm()">Back to Form</button>
+    <button class="submitBtn" onclick="submitData()">Submit Data</button> <!-- Submit Button for Preview Page -->
+  </div>
+
+  <script>
+    let rowCount = 1;
+
+    // Function to add new row
+    document.getElementById('addRowBtn').addEventListener('click', function() {
+      rowCount++;
+      const newRow = document.createElement('div');
+      newRow.classList.add('row');
+      newRow.id = `row_${rowCount}`;
+      newRow.innerHTML = `
+        <input type="date" name="r${rowCount}c1" required>
+        <select name="r${rowCount}c2" required>
+          <option value="n1">n1</option>
+          <option value="n2">n2</option>
+        </select>
+        <select name="r${rowCount}c3" required>
+          <option value="nn1">nn1</option>
+          <option value="gds">gds</option>
+          <option value="gdsg">gdsg</option>
+        </select>
+        <input type="text" name="r${rowCount}c4" placeholder="Row ${rowCount}, Col 4" required>
+        <input type="text" name="r${rowCount}c5" placeholder="Row ${rowCount}, Col 5" required>
+        <button type="button" class="deleteBtn" onclick="deleteRow(${rowCount})">Delete</button>
+      `;
+      document.getElementById('rowsContainer').appendChild(newRow);
+    });
+
+    // Function to delete a row
+    function deleteRow(rowId) {
+      const row = document.getElementById(`row_${rowId}`);
+      row.remove();
+      rowCount--;
+    }
+
+    // Function to go back to the form page
+    function goBackToForm() {
+      document.getElementById('formPage').classList.remove('hidden');
+      document.getElementById('previewPage').classList.add('hidden');
+      document.getElementById('pageTitle').textContent = "Add Rows Form";
+    }
+
+    // Handle form submission
+    document.getElementById('dynamicForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const formData = new FormData(this);
+      let rows = [];
+
+      // Extract row data
+      for (let i = 1; i <= rowCount; i++) {
+        let row = [];
+        for (let j = 1; j <= 5; j++) {
+          row.push(formData.get(`r${i}c${j}`));
+        }
+        rows.push(row.join(':'));  // Join row values with ":"
+      }
+
+      const result = {
+        "ty": "AR",
+        "dt": rows.join(',')  // Join rows with ","
+      };
+
+      // Show preview page
+      document.getElementById('formPage').classList.add('hidden');
+      document.getElementById('previewPage').classList.remove('hidden');
+      document.getElementById('pageTitle').textContent = "Preview of Added Rows";
+
+      // Update preview table
+      updatePreview(result);
+    });
+
+    // Function to update the preview table
+    function updatePreview(result) {
+      const rows = result.dt.split(',');
+      const tbody = document.getElementById('previewTable').getElementsByTagName('tbody')[0];
+      tbody.innerHTML = ''; // Clear previous preview
+
+      rows.forEach(row => {
+        const rowData = row.split(':');
+        const tr = document.createElement('tr');
+        
+        // Date (column 1) should be kept as is (no split needed)
+        const dateCell = document.createElement('td');
+        dateCell.textContent = rowData[0]; // Full date string
+        tr.appendChild(dateCell);
+
+        // Columns 2 and 3 (dropdown selections)
+        for (let i = 1; i < 5; i++) {
+          const td = document.createElement('td');
+          td.textContent = rowData[i];
+          tr.appendChild(td);
+        }
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Function to submit the data from preview
+    async function submitData() {
+      // Prepare the data (this should be the same data you're sending to the Vercel function)
+      const result = {
+        "ty": "AR",
+        "dt": document.getElementById('previewTable').getElementsByTagName('tbody')[0].innerText
+      };
+
+      try {
+        // Show loading spinner or message
+        alert("Submitting data...");
+
+        // Send data to Vercel function (replace YOUR_VERCEL_FUNCTION_URL with the actual Vercel function URL)
+        const response = await fetch('https://your-vercel-function-url', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(result), // Send the data to Vercel function
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to submit data to Vercel');
+        }
+
+        // Wait for the response from Vercel (which will include the response from GAS)
+        const responseData = await response.json();
+
+        // Handle response from Vercel (which contains the response from GAS)
+        if (responseData.status === 'success') {
+          alert('Data submitted successfully!');
+        } else {
+          alert('Error: ' + responseData.message);
+        }
+
+      } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while submitting the data.');
+      }
+    }
+  </script>
+</body>
+</html>
