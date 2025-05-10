@@ -173,9 +173,9 @@
         <option value="Proof reading">Proof reading</option>
       </select>
       <select name="r${rowCount}c3" required>
-        <option value="nn1">nn1</option>
-        <option value="gds">gds</option>
-        <option value="gdsg">gdsg</option>
+        <option value="Ramachandra M">Ramachandra M</option>
+        <option value="Sriram Aithal">Sriram Aithal</option>
+        <option value="InterPreter Incorporation">InterPreter Incorporation</option>
       </select>
       <input type="text" name="r${rowCount}c4" placeholder="Particular/Description" required>
       <input type="number" name="r${rowCount}c5" placeholder="Word Count" required>
@@ -185,13 +185,11 @@
     document.getElementById('rowsContainer').appendChild(newRow);
   });
 
-  // Delete a row
   function deleteRow(rowId) {
     const row = document.getElementById(`row_${rowId}`);
     if (row) row.remove();
   }
 
-  // Back to form
   function goBackToForm() {
     document.getElementById('formPage').classList.remove('hidden');
     document.getElementById('previewPage').classList.add('hidden');
