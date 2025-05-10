@@ -71,7 +71,7 @@
 <script>
   const responseParagraph = document.getElementById('response');
   let rowCount = 1;
-  let previewData = null; // 🔹 Store preview result globally
+  let previewData = null; // 
 
   // Add new row
   document.getElementById('addRowBtn').addEventListener('click', function () {
@@ -135,7 +135,7 @@
 
     previewData = {
       ty: 'AR',
-      dt: rows.join(',')  // 🔹 Save the string exactly as required
+      dt: rows.join(',') 
     };
 
     document.getElementById('formPage').classList.add('hidden');
@@ -169,7 +169,7 @@
       responseParagraph.textContent = "No preview data found.";
       return;
     }
-
+    console.log(previewData)
     try {
       const res = await fetch('/api/submitData', {
         method: 'POST',
