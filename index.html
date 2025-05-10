@@ -178,10 +178,10 @@
       };
       console.log(result)
       try {
-    const res = await fetch('/api/test', {
+    const res = await fetch('/api/submitData', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data1 }),
+      body: JSON.stringify({ result }),
     });
 
     if (!res.ok) {
