@@ -5,92 +5,86 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dynamic Row Form with Preview</title>
   <style>
+  /* Base setup */
   body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f4f6f9;
-    color: #333;
-    margin: 20px;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #f0f2f5, #dfe6e9);
+    margin: 0;
+    padding: 40px;
+    color: #2c3e50;
   }
 
+  h1, h2 {
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 30px;
+    color: #2d3436;
+    animation: fadeInDown 0.6s ease-in-out;
+  }
+
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Form styling */
   .row {
     display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+    animation: fadeIn 0.5s ease-in;
   }
 
   .row input, .row select {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    outline: none;
     flex: 1;
-    background: white;
-    transition: border 0.3s ease;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
   }
 
   .row input:focus, .row select:focus {
-    border-color: #007BFF;
-    box-shadow: 0 0 5px rgba(0,123,255,0.3);
+    border-color: #4e73df;
+    box-shadow: 0 0 8px rgba(78, 115, 223, 0.2);
+    outline: none;
+  }
+
+  /* Button styles */
+  .deleteBtn, .backBtn, .submitBtn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
   }
 
   .deleteBtn {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    background-color: #e74c3c;
   }
 
   .deleteBtn:hover {
-    background-color: #c82333;
-  }
-
-  .hidden {
-    display: none;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    background: white;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    margin-top: 25px;
-    border-radius: 8px;
-    overflow: hidden;
-  }
-
-  th {
-    background-color: #007BFF;
-    color: white;
-    padding: 12px;
-    text-align: left;
-  }
-
-  td {
-    padding: 12px;
-    border-top: 1px solid #eaeaea;
-  }
-
-  .backBtn, .submitBtn {
-    padding: 12px 24px;
-    border: none;
-    border-radius: 6px;
-    color: white;
-    cursor: pointer;
-    font-size: 14px;
-    margin-top: 20px;
-    transition: background-color 0.3s ease;
+    background-color: #c0392b;
+    transform: scale(1.05);
   }
 
   .backBtn {
     background-color: #6c757d;
+    margin-right: 10px;
   }
 
   .backBtn:hover {
     background-color: #5a6268;
+    transform: scale(1.05);
   }
 
   .submitBtn {
@@ -99,8 +93,57 @@
 
   .submitBtn:hover {
     background-color: #218838;
+    transform: scale(1.05);
+  }
+
+  /* Hidden utility */
+  .hidden {
+    display: none;
+  }
+
+  /* Table styling */
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    margin-top: 40px;
+    border-radius: 10px;
+    overflow: hidden;
+    animation: fadeIn 0.7s ease;
+  }
+
+  th {
+    background-color: #4e73df;
+    color: white;
+    padding: 16px;
+    text-align: left;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+  }
+
+  td {
+    padding: 16px;
+    border-top: 1px solid #ecf0f1;
+    font-size: 15px;
+    color: #2d3436;
+  }
+
+  /* Animation */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 </style>
+
 
 </head>
 <body>
