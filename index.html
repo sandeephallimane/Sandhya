@@ -68,153 +68,150 @@
  <p id="response"></p>
     </div> 
   </div>
+<script>
+  const responseParagraph = document.getElementById('response');
+  let rowCount = 1;
+  let previewData = null; // 🔹 Store preview result globally
 
-  <script>
-    const responseParagraph = document.getElementById('response');
-    let rowCount = 1;
+  // Add new row
+  document.getElementById('addRowBtn').addEventListener('click', function () {
+    rowCount++;
+    const newRow = document.createElement('div');
+    newRow.classList.add('row');
+    newRow.id = `row_${rowCount}`;
+    newRow.innerHTML = `
+      <input type="date" name="r${rowCount}c1" required>
+      <select name="r${rowCount}c2" required>
+        <option value="Translation">Translation</option>
+        <option value="Proof reading">Proof reading</option>
+      </select>
+      <select name="r${rowCount}c3" required>
+        <option value="nn1">nn1</option>
+        <option value="gds">gds</option>
+        <option value="gdsg">gdsg</option>
+      </select>
+      <input type="text" name="r${rowCount}c4" placeholder="Particular/Description" required>
+      <input type="number" name="r${rowCount}c5" placeholder="Word Count" required>
+      <input type="number" name="r${rowCount}c6" placeholder="Rate(in Rs)" required>
+      <button type="button" class="deleteBtn" onclick="deleteRow(${rowCount})">Delete</button>
+    `;
+    document.getElementById('rowsContainer').appendChild(newRow);
+  });
 
-    // Function to add new row
-    document.getElementById('addRowBtn').addEventListener('click', function() {
-      rowCount++;
-      const newRow = document.createElement('div');
-      newRow.classList.add('row');
-      newRow.id = `row_${rowCount}`;
-      newRow.innerHTML = `
-        <input type="date" name="r${rowCount}c1" required>
-        <select name="r${rowCount}c2" required>
-          <option value="Translation">Translation</option>
-            <option value="Proof reading">Proof reading</option>
-        </select>
-        <select name="r${rowCount}c3" required>
-          <option value="nn1">nn1</option>
-          <option value="gds">gds</option>
-          <option value="gdsg">gdsg</option>
-        </select>
-        <input type="text" name="r${rowCount}c4" placeholder="Particular/Description" required>
-        <input type="number" name="r${rowCount}c5" placeholder="Word Count" required>
-        <input type="number" name="r${rowCount}c6" placeholder="Rate(in Rs)" required>
-        <button type="button" class="deleteBtn" onclick="deleteRow(${rowCount})">Delete</button>
-      `;
-      document.getElementById('rowsContainer').appendChild(newRow);
-    });
-
-    // Function to delete a row
-    function deleteRow(rowId) {
-      const row = document.getElementById(`row_${rowId}`);
-      row.remove();
-      rowCount--;
-    }
-
-    // Function to go back to the form page
-    function goBackToForm() {
-      document.getElementById('formPage').classList.remove('hidden');
-      document.getElementById('previewPage').classList.add('hidden');
-      document.getElementById('pageTitle').textContent = "Add Rows Form";
-    }
-
-    // Handle form submission
-    document.getElementById('dynamicForm').addEventListener('submit', function(event) {
-      event.preventDefault();
-
-      const formData = new FormData(this);
-      let rows = [];
-
-      // Extract row data
-      for (let i = 1; i <= rowCount; i++) {
-        let row = [];
-        for (let j = 1; j <= 6; j++) {
-          row.push(formData.get(`r${i}c${j}`));
-          if(j==6){
-            row.push(formData.get(`r${i}c5`)*formData.get(`r${i}c6`))
-          }
-        }
-  
-        rows.push(row.join(':'));  // Join row values with ":"
-      }
-       
-      const result = {
-        "ty": "AR",
-        "dt": rows.join(',')  // Join rows with ","
-      };
-      console.log("result:",result)
-      document.getElementById('formPage').classList.add('hidden');
-      document.getElementById('previewPage').classList.remove('hidden');
-      document.getElementById('pageTitle').textContent = "Preview Details";
-
-      updatePreview(result);
-    });
-
-    // Function to update the preview table
-    function updatePreview(result) {
-      const rows = result.dt.split(',');
-      const tbody = document.getElementById('previewTable').getElementsByTagName('tbody')[0];
-      tbody.innerHTML = ''; 
-
-      rows.forEach(row => {
-        const rowData = row.split(':');
-        const tr = document.createElement('tr');
-        
-        // Date (column 1) should be kept as is (no split needed)
-        const dateCell = document.createElement('td');
-        dateCell.textContent = rowData[0]; // Full date string
-        tr.appendChild(dateCell);
-
-        // Columns 2 and 3 (dropdown selections)
-        for (let i = 1; i < 7; i++) {
-          const td = document.createElement('td');
-          td.textContent = rowData[i];
-          tr.appendChild(td);
-        }
-
-        tbody.appendChild(tr);
-      });
-    }
-
-    // Function to submit the data from preview
-    async function submitData() {
-      const result = {
-        "ty": "AR",
-        "dt": document.getElementById('previewTable').getElementsByTagName('tbody')[0].innerText
-      };
-      console.log(result)
-      try {
-    const res = await fetch('/api/submitData', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ result }),
-    });
-
-    if (!res.ok) {
-      throw new Error('Error submitting data');
-    }
-
-    const contentType = res.headers.get('Content-Type');
-
-    if (contentType && contentType.includes('application/json')) {
-      const result1 = await res.json();
-
-      if (result1.link) {
-        window.location.href = result1.link; 
-      }
-   else if (result1.base64html) {
-        const decodedHTML =  base64DecodeUnicode(result1.base64html);
-        responseParagraph.innerHTML = decodedHTML;
-      }
-      else {
-        responseParagraph.textContent = 'No valid data received in the response.';
-      }
-    } 
-    else if (contentType && contentType.includes('text/html')) {
-      const htmlContent = await res.text();
-      responseParagraph.innerHTML = htmlContent; 
-    } 
-    else {
-      throw new Error('Unsupported response format from the server');
-    }
-  } catch (error) {
-    responseParagraph.textContent = `Error: ${error.message}`;
+  // Delete a row
+  function deleteRow(rowId) {
+    const row = document.getElementById(`row_${rowId}`);
+    if (row) row.remove();
   }
-}
-  </script>
+
+  // Back to form
+  function goBackToForm() {
+    document.getElementById('formPage').classList.remove('hidden');
+    document.getElementById('previewPage').classList.add('hidden');
+    document.getElementById('pageTitle').textContent = "Add Rows Form";
+  }
+
+  // Form submit handler for preview
+  document.getElementById('dynamicForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const formData = new FormData(this);
+    const allRows = document.querySelectorAll('#rowsContainer .row');
+    let rows = [];
+
+    allRows.forEach((row, idx) => {
+      const inputs = row.querySelectorAll('input, select');
+      const date = inputs[0].value;
+      const type = inputs[1].value;
+      const provider = inputs[2].value;
+      const desc = inputs[3].value;
+      const wordCount = parseFloat(inputs[4].value);
+      const rate = parseFloat(inputs[5].value);
+      const total = (wordCount * rate).toFixed(2);
+
+      const rowString = [date, type, provider, desc, wordCount, rate, total].join(':');
+      rows.push(rowString);
+    });
+
+    previewData = {
+      ty: 'AR',
+      dt: rows.join(',')  // 🔹 Save the string exactly as required
+    };
+
+    document.getElementById('formPage').classList.add('hidden');
+    document.getElementById('previewPage').classList.remove('hidden');
+    document.getElementById('pageTitle').textContent = "Preview Details";
+
+    updatePreview(previewData);
+  });
+
+  // Update preview table
+  function updatePreview(result) {
+    const rows = result.dt.split(',');
+    const tbody = document.getElementById('previewTable').getElementsByTagName('tbody')[0];
+    tbody.innerHTML = '';
+
+    rows.forEach(row => {
+      const rowData = row.split(':');
+      const tr = document.createElement('tr');
+      rowData.forEach(cell => {
+        const td = document.createElement('td');
+        td.textContent = cell;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Final submission
+  async function submitData() {
+    if (!previewData) {
+      responseParagraph.textContent = "No preview data found.";
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/submitData', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ result: previewData }),
+      });
+
+      if (!res.ok) throw new Error('Error submitting data');
+
+      const contentType = res.headers.get('Content-Type');
+
+      if (contentType && contentType.includes('application/json')) {
+        const result1 = await res.json();
+
+        if (result1.link) {
+          window.location.href = result1.link;
+        } else if (result1.base64html) {
+          const decodedHTML = base64DecodeUnicode(result1.base64html);
+          responseParagraph.innerHTML = decodedHTML;
+        } else {
+          responseParagraph.textContent = 'No valid data received in the response.';
+        }
+      } else if (contentType && contentType.includes('text/html')) {
+        const htmlContent = await res.text();
+        responseParagraph.innerHTML = htmlContent;
+      } else {
+        throw new Error('Unsupported response format from the server');
+      }
+    } catch (error) {
+      responseParagraph.textContent = `Error: ${error.message}`;
+    }
+  }
+
+  // Base64 decode helper
+  function base64DecodeUnicode(str) {
+    try {
+      return decodeURIComponent(escape(window.atob(str)));
+    } catch (e) {
+      return "Invalid base64 HTML string";
+    }
+  }
+</script>
+
 </body>
 </html>
