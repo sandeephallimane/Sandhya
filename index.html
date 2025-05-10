@@ -41,7 +41,7 @@
       </div>
 
       <button type="button" id="addRowBtn">Add Row</button>
-      <button type="submit">Submit</button>
+      <button type="submit">Preview</button>
     </form>
   </div>
 
@@ -62,10 +62,15 @@
     </table>
 
     <button class="backBtn" onclick="goBackToForm()">Back to Form</button>
-    <button class="submitBtn" onclick="submitData()">Submit Data</button> <!-- Submit Button for Preview Page -->
+    <button class="submitBtn" onclick="submitData()">Submit Data</button> 
+    <br><br>
+    <div class="rp" id="rp">
+ <p id="response"></p>
+    </div> 
   </div>
 
   <script>
+    const responseParagraph = document.getElementById('response');
     let rowCount = 1;
 
     // Function to add new row
@@ -126,18 +131,16 @@
   
         rows.push(row.join(':'));  // Join row values with ":"
       }
-
+       
       const result = {
         "ty": "AR",
         "dt": rows.join(',')  // Join rows with ","
       };
-
-      // Show preview page
+      console.log("result:",result)
       document.getElementById('formPage').classList.add('hidden');
       document.getElementById('previewPage').classList.remove('hidden');
-      document.getElementById('pageTitle').textContent = "Preview of Added Rows";
+      document.getElementById('pageTitle').textContent = "Preview Details";
 
-      // Update preview table
       updatePreview(result);
     });
 
@@ -145,7 +148,7 @@
     function updatePreview(result) {
       const rows = result.dt.split(',');
       const tbody = document.getElementById('previewTable').getElementsByTagName('tbody')[0];
-      tbody.innerHTML = ''; // Clear previous preview
+      tbody.innerHTML = ''; 
 
       rows.forEach(row => {
         const rowData = row.split(':');
@@ -169,44 +172,49 @@
 
     // Function to submit the data from preview
     async function submitData() {
-      // Prepare the data (this should be the same data you're sending to the Vercel function)
       const result = {
         "ty": "AR",
         "dt": document.getElementById('previewTable').getElementsByTagName('tbody')[0].innerText
       };
-
+      console.log(result)
       try {
-        // Show loading spinner or message
-        alert("Submitting data...");
+    const res = await fetch('/api/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data1 }),
+    });
 
-        // Send data to Vercel function (replace YOUR_VERCEL_FUNCTION_URL with the actual Vercel function URL)
-        const response = await fetch('/api/submitData', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(result), // Send the data to Vercel function
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to submit data to Vercel');
-        }
-
-        // Wait for the response from Vercel (which will include the response from GAS)
-        const responseData = await response.json();
-
-        // Handle response from Vercel (which contains the response from GAS)
-        if (responseData.status === 'success') {
-          alert('Data submitted successfully!');
-        } else {
-          alert('Error: ' + responseData.message);
-        }
-
-      } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while submitting the data.');
-      }
+    if (!res.ok) {
+      throw new Error('Error submitting data');
     }
+
+    const contentType = res.headers.get('Content-Type');
+
+    if (contentType && contentType.includes('application/json')) {
+      const result1 = await res.json();
+
+      if (result1.link) {
+        window.location.href = result1.link; 
+      }
+   else if (result1.base64html) {
+        const decodedHTML =  base64DecodeUnicode(result1.base64html);
+        responseParagraph.innerHTML = decodedHTML;
+      }
+      else {
+        responseParagraph.textContent = 'No valid data received in the response.';
+      }
+    } 
+    else if (contentType && contentType.includes('text/html')) {
+      const htmlContent = await res.text();
+      responseParagraph.innerHTML = htmlContent; 
+    } 
+    else {
+      throw new Error('Unsupported response format from the server');
+    }
+  } catch (error) {
+    responseParagraph.textContent = `Error: ${error.message}`;
+  }
+}
   </script>
 </body>
 </html>
