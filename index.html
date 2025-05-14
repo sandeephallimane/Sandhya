@@ -194,11 +194,22 @@
     <button class="backBtn" onclick="goBackToForm()">Back to Form</button>
     <button class="submitBtn" onclick="submitData()">Submit Data</button> 
     <br><br>
-    <div class="rp" id="rp">
+  </div>
+<div class="loading hidden" id="loading">
+<div class="iframe-container">
+    <iframe 
+        src="https://durgaparameshwarisevatrust.vercel.app/loading/" 
+        frameborder="0" 
+        allowfullscreen 
+        loading="lazy">
+    </iframe>
+</div>
+    </div>
+  <div class="rp hidden" id="rp">
  <p id="response"></p>
-    </div> 
   </div>
 <script>
+  const ld = document.getElementById("loading");
   const responseParagraph = document.getElementById('response');
   let rowCount = 1;
   let previewData = null; // 
@@ -293,6 +304,8 @@
 
   // Final submission
   async function submitData() {
+    document.getElementById('previewPage').classList.add('hidden');
+    ld.classList.remove('hidden');
     if (!previewData) {
       responseParagraph.textContent = "No preview data found.";
       return;
@@ -317,17 +330,27 @@
         } else if (result1.base64html) {
           const decodedHTML = base64DecodeUnicode(result1.base64html);
           responseParagraph.innerHTML = decodedHTML;
+          document.getElementById('rp').classList.remove('hidden');
+          ld.classList.add('hidden');
+
         } else {
           responseParagraph.textContent = 'No valid data received in the response.';
+          document.getElementById('rp').classList.remove('hidden');
+          ld.classList.add('hidden');
         }
       } else if (contentType && contentType.includes('text/html')) {
         const htmlContent = await res.text();
         responseParagraph.innerHTML = htmlContent;
+        document.getElementById('rp').classList.remove('hidden');
+        ld.classList.add('hidden');
       } else {
         throw new Error('Unsupported response format from the server');
       }
     } catch (error) {
       responseParagraph.textContent = `Error: ${error.message}`;
+      document.getElementById('rp').classList.remove('hidden');
+      ld.classList.add('hidden');
+
     }
   }
 
